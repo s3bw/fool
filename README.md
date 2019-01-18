@@ -4,13 +4,13 @@
 
 <h4 align='center'>
     Text-based User Interface Components
-<h4>
+</h4>
 
 The goal is to create tui displays quickly, and to encapsulate the interaction logic with each component at instantiation.
 
 ## Quick Example
 
-```
+```python
 from fool import console
 from fool.bars import Bar
 from fool.usrip import Input
