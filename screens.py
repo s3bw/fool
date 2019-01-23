@@ -4,12 +4,13 @@ from fool.windows import Window, Split
 root_screen = Screen(100, 100, 0, 0)
 console = root_screen.subwin(0, 0)
 
-
+# 2nd
 win = Window()
-margin = Window(pin_max_x=20)
+margin = Window(pin_max_x=10)
 split = Split(win, margin, axis='vertical')
 
-margin = Window(pin_max_x=10)
+# 1st
+margin = Window(pin_max_x=15)
 split = Split(margin, split, axis='vertical')
 
 

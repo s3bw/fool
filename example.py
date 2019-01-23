@@ -10,10 +10,10 @@ def view(screen, model):
     left, right = model['left_right']
 
     win = Window()
-    margin = Window(pin_max_x=20)
+    margin = Window(pin_max_x=10)
     split = Split(win, margin, axis='vertical')
 
-    margin = Window(pin_max_x=10)
+    margin = Window(pin_max_x=15)
     split = Split(margin, split, axis='vertical')
     return [
         split,
