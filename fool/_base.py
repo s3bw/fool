@@ -3,10 +3,12 @@ class Base:
     def update_screen(self):
         self.max_y, self.max_x = self.screen.getmaxyx()
         self.bottom_y = self.max_y - 1
+        self.right_x = self.max_x - 1
         self.centre_x = int(self.max_x / 2)
 
     def attach_screen(self, screen):
         self.screen = screen
+        self.update_screen()
 
     def update(self):
         self.update_screen()

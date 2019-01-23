@@ -16,6 +16,53 @@ def setup_console(stdscreen, view, model, **kwargs):
     return action
 
 
+import itertools
+
+
+class Screen:
+
+    iditer = itertools.count()
+
+    def __init__(self, h, w, y, x):
+        self.name = next(Screen.iditer)
+        self.h = h
+        self.w = w
+        self.y = y
+        self.x = x
+        self.parscreen = None
+
+    def subwin(self, *args):
+        if len(args) == 2:
+            y, x = args
+            h, w = self.h, self.w
+        elif len(args) == 4:
+            h, w, y, x = args
+
+        screen = Screen(h, w, y, x)
+        screen.parscreen = self
+        print("Subwin {}; h: {}, w: {}, y: {}, x: {}".format(screen.name, h, w, y, x))
+        return screen
+
+    def getparyx(self):
+        return self.y - self.parscreen.y, self.x - self.parscreen.x
+
+    def getmaxyx(self):
+        return self.y + self.h, self.x + self.w
+
+    def clear(self):
+        print("Clear")
+
+    def keypad(self, num):
+        print("Keypad")
+
+    def mvderwin(self, y, x):
+        print("Move {} to y: {}, x: {}".format(self.name, y, x))
+
+    def resize(self, h, w):
+        print("Resize {} to h: {}, w: {}".format(self.name, h, w))
+
+
+
 class Console(Base):
 
     def close(self):
@@ -25,7 +72,7 @@ class Console(Base):
         self.screen = stdscreen.subwin(0, 0)
         self.panel = panel.new_panel(self.screen)
 
-        self.render_ui = view(model)
+        self.render_ui = view(self.screen, model)
         self.key_map = {
             value: getattr(self, key)
             for key, value in kwargs.items()
@@ -33,7 +80,7 @@ class Console(Base):
 
         self.listener = KeyListener()
         self.collect_keys()
-        self.attach_screen()
+        self.attach_screens()
 
     def __enter__(self):
         panel.update_panels()
@@ -51,7 +98,7 @@ class Console(Base):
         panel.update_panels()
         curses.doupdate()
 
-    def attach_screen(self):
+    def attach_screens(self):
         for ui in self.render_ui:
             ui.attach_screen(self.screen)
         self.listener.attach_screen(self.screen)
