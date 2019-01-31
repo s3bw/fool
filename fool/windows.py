@@ -1,7 +1,13 @@
 """Window class to split the console into parts."""
-import itertools
-
 from fool._base import Base
+from fool._debug import travel, counter
+
+from fool.text import Alignments
+from fool.registry import Registry
+from fool.trees import in_order_traversal
+from fool.trees import breadth_first_traversal
+
+from fool.content import ListItem, ListItems
 
 
 class Window(Base):
@@ -71,6 +77,67 @@ class TextWindow(Window):
                 content.draw(0, self.start_x, self.width, self.screen)
         super(TextWindow, self).draw()
 
+    def setup_content(self):
+        """Text doesn't need to be setup."""
+        pass
+
+
+
+class TableWindow(Window, Alignments):
+
+    def __init__(self, w, items):
+        self.items = ListItems(items)
+        print([item.more for item in self.items.iter_viewable()])
+        super().__init__(w=w)
+
+    def setup_content(self):
+        self.register_columns()
+
+    def register_columns(self):
+        self.registry = Registry()
+        for column in self.content:
+            self.registry.register_object(column.name, column)
+
+    def draw_line(self, item, line):
+        align = {'left': self.left_align,
+                 'right': self.right_align,
+                 'centre': self.centre_align}
+
+        left_x = self.start_x + 2
+        for column in self.registry.get_objects():
+            cln_setting = self.registry.get_object(column)
+            size = cln_setting.size
+            if left_x + size + 2 < (self.start_x + self.width):
+                pline = getattr(item, column)
+                pline = display_text(pline)
+
+                alignment = cln_setting.align
+                pline = align[alignment](pline, size)
+                self.screen.addstr(line, left_x, pline)
+                left_x += size + 2
+                if left_x < self.max_x:
+                    self.screen.addstr(line, left_x, '|')
+                    left_x += 2
+            else:
+                break
+
+    def draw_item(self, item):
+        """Draw an item."""
+        self.drawing_line += 1
+        line = self.drawing_line
+        self.draw_line(item, line)
+
+    def draw(self):
+        """Draw all viewable items."""
+        self.drawing_line = 0
+        for item in self.items.iter_viewable():
+            self.draw_item(item)
+        super(TableWindow, self).draw()
+
+
+def display_text(x):
+    return str(x)
+
 
 def assign_width(obj, remaining_width):
     """Assign width provides a window their width.
@@ -89,48 +156,9 @@ def assign_width(obj, remaining_width):
     return remaining_width
 
 
-def breadth_first_traversal(obj, value, visit_func):
-    """breadth first traversal of windows."""
-    queue = [obj]
-    while queue:
-        obj = queue.pop(0)
-        value = visit_func(obj, value)
-        if obj.left:
-            queue.append(obj.left)
-        if obj.right:
-            queue.append(obj.right)
-    return value
-
-
 def assign_x(obj, next_x):
     """Assign next x to the object's starting x, the next x
     will be the object's start_x + object's width.
     """
     obj.start_x = next_x
     return obj.width + next_x
-
-
-def in_order_traversal(obj, value, visit_func):
-    """In order traversal of windows."""
-    if obj:
-        value = in_order_traversal(obj.left, value, visit_func)
-        value = visit_func(obj, value)
-        value = in_order_traversal(obj.right, value, visit_func)
-    return value
-
-
-counter = itertools.count()
-
-
-def travel(ob):
-    """Used for debugging.
-    Prints the dimensions of mocked screen objects.
-    """
-    queue = [ob]
-    while queue:
-        ob = queue.pop(0)
-        print(next(counter), ob.width, ob.name, ob.start_x)
-        if ob.left:
-            queue.append(ob.left)
-        if ob.right:
-            queue.append(ob.right)

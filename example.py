@@ -1,41 +1,29 @@
 from fool import console
-from fool.usrip import Input
-from fool.bars import TextBar
-from fool.bars import ToggleBar
-from fool.content import TextBlob
-from fool.windows import Window, TextWindow
+
+from fool.content import Column, BooleanColumn
+from fool.windows import TableWindow, Window
 
 
 def view(screen, model):
-    left, right = model['left_right']
-
-    main = TextWindow(w=70)
-    main.content = [
-        TextBlob(path='example_text.txt')
+    main_items = model['main']
+    main = TableWindow(w=40, items=main_items)
+    content = [
+        BooleanColumn(name='more', size=2, align='centre'),
+        Column(name='title', size=10, align='left'),
+        Column(name='description', size=32, align='left'),
     ]
+    main.content = content
 
-    main.left = Window(w=10)
-    main.right = Window(w=40)
+    main.right = Window(w=50)
+    return [main]
 
-    return [
-        main,
-        # TextBar("Option 1 or 2?", 50, 25),
-        # Input(left=left, right=right),
-        # ToggleBar(['Show', 'This', 'can', 'toggle'], 40, 10, toggle='H'),
+
+model = {'main':
+    [
+        {'title': 'first item', 'description': 'first item description', 'more': True},
+        {'title': '2nd item', 'description': '2nd item description', 'more': False},
+        {'title': '3rd item', 'description': '3rd item description', 'more': True},
     ]
+}
 
-
-def view_option_1(screen, model):
-    return [TextBar("Option 1", 5, 5)]
-
-
-def view_option_2(screen, model):
-    return [TextBar("Option 2", 5, 5)]
-
-
-model = {'left_right': ('h', 'l')}
-action = console.display(view, model, close='q')
-if action == 'left':
-    console.display(view_option_1, model, close='q')
-elif action == 'right':
-    console.display(view_option_2, model, close='q')
+console.display(view, model, close='q')

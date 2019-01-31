@@ -20,3 +20,36 @@ class TextBlob:
             y += 1
             screen.addstr(y, x + 1, self.text[i:i+width-1])
             i += (width - 1)
+
+
+class Column:
+
+    def __init__(self, name, size, align='left'):
+        self.name = name
+        self.size = size
+        self.align = align
+
+
+class BooleanColumn(Column):
+    pass
+
+
+class ListItem:
+    def __init__(self, **attrs):
+        self.__dict__.update(attrs)
+
+
+class ListItems:
+
+    def __init__(self, items):
+        self.menu = [
+            ListItem(**attrs)
+            for attrs in items
+        ]
+
+    def iter_viewable(self):
+        for item in self.menu:
+            yield item
+            if hasattr(item, 'expand') and item.expand:
+                for subitem in item.subitems:
+                    yield subitem

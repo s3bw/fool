@@ -100,6 +100,10 @@ class Console(Base):
 
     def attach_screens(self):
         for ui in self.render_ui:
+            # If a ui object has content, sometimes we are
+            # required to prepare this content for rendering.
+            if ui.content:
+                ui.setup_content()
             ui.attach_screen(self.screen)
         self.listener.attach_screen(self.screen)
 
