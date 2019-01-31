@@ -8,6 +8,14 @@
 
 The goal is to create tui displays quickly, and to encapsulate the interaction logic with each component at instantiation.
 
+## Install
+
+For latest
+
+```
+pip install git+ssh://git@github.com/foxyblue/fool.git@master
+```
+
 ## Examples
 
 Accept user input
