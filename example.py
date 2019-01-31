@@ -2,22 +2,20 @@ from fool import console
 from fool.usrip import Input
 from fool.bars import TextBar
 from fool.bars import ToggleBar
-from fool.windows import Split
 from fool.windows import Window
 
 
 def view(screen, model):
     left, right = model['left_right']
 
-    win = Window()
-    margin = Window(pin_max_x=10)
-    split = Split(win, margin, axis='vertical')
+    main = Window(w=50)
+    # main.left = Window(w=30)
+    main.right = Window(w=40)
+    # main.left.left = Window(w=20)
 
-    margin = Window(pin_max_x=15)
-    split = Split(margin, split, axis='vertical')
     return [
-        split,
-        # TextBar("Option 1 or 2?", 40, 5),
+        main,
+        TextBar("Option 1 or 2?", 40, 5),
         # Input(left=left, right=right),
         # ToggleBar(['Show', 'This', 'can', 'toggle'], 40, 10, toggle='H'),
     ]

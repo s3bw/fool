@@ -1,119 +1,103 @@
-import debug
-import logging
+import itertools
 
 from fool._base import Base
 
 
-class Split:
+counter = itertools.count()
 
-    def __init__(self, win1, win2, axis='vertical'):
-        # Can't both have a pin_max.
-        # win1 must always have a pin_min.
-        #   The default win1 should be the centre.
-        # pin_min can't be larger than pin_max.
-        self.left = win1
-        self.right = win2
-        self.axis = axis
 
-    def determine_sizes(self):
-        """
-        """
-        y, x = self.screen.getparyx()
-        #print("Parscreen: {}, {}y {}x".format(self.screen.parscreen.name, y, x))
-        max_y, max_x = self.screen.getmaxyx()
-        print("Max: {}y {}x".format(max_y, max_x))
-        max_y, max_x = max_y - y, max_x - x
-        # print("Name: {}".format(self.screen.name))
-        print("Total allocation: {}y {}x".format(max_y, max_x))
-        centre_y, centre_x = int(max_y / 2), int(max_x / 2)
+def travel(ob):
+    """Used for debugging.
+    Prints the dimensions of mocked screen objects.
+    """
+    queue = [ob]
+    while queue:
+        ob = queue.pop(0)
+        print(next(counter), ob.win_w, ob.name, ob.start_x)
+        if ob.left:
+            queue.append(ob.left)
+        if ob.right:
+            queue.append(ob.right)
 
-        if self.axis == 'vertical':
-            # If Max X and the Max x is less than centre.
-            if self.left.pin_max_x and self.left.pin_max_x < centre_x:
-                left_h, left_w = max_y, self.left.pin_max_x
-                y2, x2 = y, left_w + x
-                right_h, right_w = max_y, max_x - left_w
-                right_w += 10
-                x2 -= 10
-                # left_w += 20
-            # After checking win1 check win2
-            elif self.right.pin_max_x and self.right.pin_max_x < centre_x:
-                left_h, left_w = max_y, max_x - self.right.pin_max_x
-                y2, x2 = y, left_w + x
-                right_h, right_w = max_y, self.right.pin_max_x
-                # left_w -= 10
-                # right_w -= 4
-                # x -= 10
-                # x2 -= 10
-                # print("Yes")
-            # If Min X is greater than or equal to centre.
-            elif self.left.pin_min_x >= centre_x:
-                left_h, left_w = max_y, self.left.pin_min_x
-                y2, x2 = y, left_w + x
-                right_h, right_w = max_y, max_x - left_w
-            elif self.left.pin_min_x >= max_x:
-                left_h, left_w = max_y, max_x
-                # Don't render win2.
-                y2, x2 = y, left_w + x
-                right_h, right_w = max_y, max_x - left_w
-            return (left_h, left_w, y, x), (right_h, right_w, y2, x2)
 
-    def attach_screen(self, screen):
-        self.screen = screen
-        # y, x = screen.getyx()
-        # max_y, max_x = screen.getmaxyx()
-        # self.win1.paryx = (max_y, max_x)
-        # self.win2.paryx = (max_y, max_x)
-        # self.screen = screen.subwin(max_y, max_x, y, x)
-        # logging.info((max_y, max_x, y, x))
-        dimension1, dimension2 = self.determine_sizes()
-        screen_1 = self.screen.subwin(*dimension1)
-        screen_2 = self.screen.subwin(*dimension2)
-        # import logging
-        # logging.info(screen_1.getparyx())
-        # logging.info(screen_2.getparyx())
-        self.left.attach_screen(screen_1)
-        self.right.attach_screen(screen_2)
+def width_visit(obj, max_value):
+    if 0 < max_value:
+        if obj.w <= max_value:
+            obj.win_w = obj.w
+        else:
+            obj.win_w = max_value
+        max_value -= obj.win_w
+    return max_value
 
-    def update(self):
-        # self.update_screen()
-        # Resize the windows and splits.
-        dimension1, dimension2 = self.determine_sizes()
-        self.left.resize(dimension1)
-        # h, w, y, x = dimension2
-        self.right.resize(dimension2)
-        self.left.update()
-        self.right.update()
 
-    def resize(self, dimensions):
-        h, w, y, x = dimensions
-        # Move y, x
-        self.screen.mvderwin(y, x)
-        # Resize h, w
-        self.screen.resize(h, w)
+def margin_width(obj, max_value):
+    """BF application of width to left and right nodes."""
+    queue = [obj]
+    while queue:
+        obj = queue.pop(0)
+        max_value = width_visit(obj, max_value)
+        if obj.left:
+            queue.append(obj.left)
+        if obj.right:
+            queue.append(obj.right)
+    return max_value
 
-    def draw(self):
-        self.left.draw()
-        self.right.draw()
 
-    def visit(self, listener):
-        """These could be adjust split keys."""
-        pass
+def x_visit(obj, previous_x):
+    obj.start_x = previous_x
+    return obj.win_w + previous_x
+
+
+def margin_x(obj, previous_x):
+    """Provide x for screens."""
+    if obj:
+        previous_x = margin_x(obj.left, previous_x)
+        previous_x = x_visit(obj, previous_x)
+        previous_x = margin_x(obj.right, previous_x)
+    return previous_x
 
 
 class Window(Base):
 
-    # def __init__(self, h, w, y, x, screen):
-    #     self.screen = self.screen.subwin(h, w, y, x)
+    # Margins (would be instances of Window)
+    left = None
+    right = None
 
-    #     self.text = text
-    #     self.x = x
-    #     self.y = y
-    #     self.hr = hr
-    #     self.wr = wr
-    def __init__(self, pin_max_x=None, pin_min_x=None):
-        self.pin_max_x = pin_max_x
-        self.pin_min_x = pin_min_x if pin_min_x else pin_max_x
+    def __init__(self, name=None, h=None, w=None):
+        self.name = next(name) if name else name
+        self.h = h
+        self.w = w
+
+    def attach_screen(self, screen):
+        """Attach screens to window objects."""
+        _, max_x = screen.getmaxyx()
+
+        # Calculating the width of each window
+        self.calculate_width(max_x)
+
+        # Assigning the starting x for each window
+        # Assert margin_x return should == max_x
+        # SUM(w) == Console_w
+        assert margin_x(self, 0) == max_x
+
+        # Build each screen for the windows
+        self.build_screen(screen)
+
+        # NOTE:(foxyblue): travel used for debugging
+        travel(self)
+
+    def build_screen(self, screen):
+        max_y, _ = screen.getmaxyx()
+        self.screen = screen.subwin(max_y, self.win_w, 0, self.start_x)
+        if self.left:
+            self.left.build_screen(screen)
+        if self.right:
+            self.right.build_screen(screen)
+
+    def calculate_width(self, max_x):
+        self.win_w = 0
+        add = margin_width(self, max_x)
+        self.win_w += add
 
     def resize(self, dimensions):
         h, w, y, x = dimensions
@@ -123,8 +107,10 @@ class Window(Base):
 
     def update(self):
         super(Window, self).update()
-        # self.window = self.screen.subwin(self.h, self.w, self.y, self.x)
 
     def draw(self):
-        # if self.x <= self.max_x and self.y <= self.max_y:
         self.screen.border('|', '|', '-', '-', '+', '+', '+', '+')
+        if self.left:
+            self.left.draw()
+        if self.right:
+            self.right.draw()
