@@ -2,20 +2,24 @@ from fool import console
 from fool.usrip import Input
 from fool.bars import TextBar
 from fool.bars import ToggleBar
-from fool.windows import Window
+from fool.content import TextBlob
+from fool.windows import Window, TextWindow
 
 
 def view(screen, model):
     left, right = model['left_right']
 
-    main = Window(w=50)
-    main.left = Window(w=30)
+    main = TextWindow(w=70)
+    main.content = [
+        TextBlob(path='example_text.txt')
+    ]
+
+    main.left = Window(w=10)
     main.right = Window(w=40)
-    # main.left.left = Window(w=20)
 
     return [
         main,
-        TextBar("Option 1 or 2?", 40, 5),
+        # TextBar("Option 1 or 2?", 50, 25),
         # Input(left=left, right=right),
         # ToggleBar(['Show', 'This', 'can', 'toggle'], 40, 10, toggle='H'),
     ]

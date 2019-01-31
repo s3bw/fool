@@ -63,6 +63,15 @@ class Window(Base):
                 self.right.draw()
 
 
+class TextWindow(Window):
+
+    def draw(self):
+        if self.width:
+            for content in self.content:
+                content.draw(0, self.start_x, self.width, self.screen)
+        super(TextWindow, self).draw()
+
+
 def assign_width(obj, remaining_width):
     """Assign width provides a window their width.
     
