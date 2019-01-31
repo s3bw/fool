@@ -87,7 +87,6 @@ class TableWindow(Window, Alignments):
 
     def __init__(self, w, items):
         self.items = ListItems(items)
-        print([item.more for item in self.items.iter_viewable()])
         super().__init__(w=w)
 
     def setup_content(self):
