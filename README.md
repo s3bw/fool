@@ -16,6 +16,11 @@ For latest
 pip install git+ssh://git@github.com/foxyblue/fool.git@master
 ```
 
+## Fool Projects
+
+- [foolgit](https://github.com/foxyblue/foolgit)
+- [foolscap](https://github.com/foxyblue/foolscap) (Not integrated yet)
+
 ## Examples
 
 Accept user input
@@ -54,7 +59,7 @@ elif action == 'right':
 
 Display text in a window
 
-```
+```python
 from fool import console
 from fool.content import TextBlob
 from fool.windows import TextWindow
@@ -75,7 +80,7 @@ console.display(view, model, close='q')
 
 Populate a table.
 
-```
+```python
 from fool import console
 
 from fool.content import Column, BooleanColumn
