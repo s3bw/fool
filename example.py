@@ -9,7 +9,7 @@ def view(screen, model):
     left, right = model['left_right']
 
     main = Window(w=50)
-    # main.left = Window(w=30)
+    main.left = Window(w=30)
     main.right = Window(w=40)
     # main.left.left = Window(w=20)
 
