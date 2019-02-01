@@ -1,29 +1,21 @@
 from fool import console
-
-from fool.content import Column, BooleanColumn
-from fool.windows import TableWindow, Window
-
-
-def view(screen, model):
-    main_items = model['main']
-    main = TableWindow(w=40, items=main_items)
-    content = [
-        BooleanColumn(name='more', size=2, align='centre'),
-        Column(name='title', size=10, align='left'),
-        Column(name='description', size=32, align='left'),
-    ]
-    main.content = content
-
-    main.right = Window(w=50)
-    return [main]
+from examples.views import table_view
+from examples.views import text_view
+from examples.views import basic_view
+from examples.views import margin_view
 
 
-model = {'main':
+model = {
+    'main':
     [
         {'title': 'first item', 'description': 'first item description', 'more': True},
         {'title': '2nd item', 'description': '2nd item description', 'more': False},
         {'title': '3rd item', 'description': '3rd item description', 'more': True},
-    ]
+    ],
+    'left_right': ('h', 'l'),
 }
 
-console.display(view, model, close='q')
+console.display(table_view, model, close='q')
+console.display(text_view, model, close='q')
+console.display(basic_view, model, close='q')
+console.display(margin_view, model, close='q')

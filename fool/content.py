@@ -47,6 +47,9 @@ class ListItems:
             for attrs in items
         ]
 
+    def __len__(self):
+        return len(self.menu)
+
     def iter_viewable(self):
         for item in self.menu:
             yield item
