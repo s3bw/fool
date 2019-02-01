@@ -1,6 +1,9 @@
 """Window class to split the console into parts."""
+import curses
+
 from fool._base import Base
 from fool._debug import travel, counter
+from fool._interactions import Scrollable
 
 from fool.text import Alignments
 from fool.registry import Registry
@@ -8,6 +11,11 @@ from fool.trees import in_order_traversal
 from fool.trees import breadth_first_traversal
 
 from fool.content import ListItem, ListItems
+
+
+NORMAL_LINE_COLOUR = curses.A_NORMAL
+DIM_LINE_COLOUR = curses.A_DIM
+REVERSE_LINE_COLOUR = curses.A_REVERSE
 
 
 class Window(Base):
@@ -41,6 +49,7 @@ class Window(Base):
         max_y, _ = screen.getmaxyx()
         if self.width:
             self.screen = screen.subwin(max_y, self.width, 0, self.start_x)
+            self.bottom_line = max_y - 1
             if self.left:
                 self.left.build_screen(screen)
             if self.right:
@@ -82,22 +91,35 @@ class TextWindow(Window):
         pass
 
 
+class TableWindow(Window, Scrollable, Alignments):
 
-class TableWindow(Window, Alignments):
-
-    def __init__(self, w, items):
+    def __init__(self, w, items, scroll=None):
         self.items = ListItems(items)
         super().__init__(w=w)
+        self.line_colouring = _set_colour
+        if scroll:
+            up, down = scroll
+            self.key_map = {
+                up: self.move_up,
+                down: self.move_down,
+            }
+            self.max_pos = len(self.items)
+            self.line_colouring = _set_scroll_colour
 
     def setup_content(self):
         self.register_columns()
+
+    def update(self):
+        self.reduction = self.list_top
+        self.cursor = self.position
+        super().update()
 
     def register_columns(self):
         self.registry = Registry()
         for column in self.content:
             self.registry.register_object(column.name, column)
 
-    def draw_line(self, item, line):
+    def draw_line(self, item, line, line_colour):
         align = {'left': self.left_align,
                  'right': self.right_align,
                  'centre': self.centre_align}
@@ -112,19 +134,24 @@ class TableWindow(Window, Alignments):
 
                 alignment = cln_setting.align
                 pline = align[alignment](pline, size)
-                self.screen.addstr(line, left_x, pline)
+                self.screen.addstr(line, left_x, pline, line_colour)
                 left_x += size + 2
                 if left_x < self.max_x:
-                    self.screen.addstr(line, left_x, '|')
+                    self.screen.addstr(line, left_x, '|', line_colour)
                     left_x += 2
             else:
                 break
 
     def draw_item(self, item):
         """Draw an item."""
-        self.drawing_line += 1
-        line = self.drawing_line
-        self.draw_line(item, line)
+        if self.reduction > 0:
+            self.reduction -= 1
+        else:
+            self.drawing_line += 1
+            if self.drawing_line < self.bottom_line - 1:
+                line = self.drawing_line
+                line_colour = self.line_colouring(line, self.cursor)
+                self.draw_line(item, line, line_colour)
 
     def draw(self):
         """Draw all viewable items."""
@@ -134,13 +161,25 @@ class TableWindow(Window, Alignments):
         super(TableWindow, self).draw()
 
 
+def _set_colour(line, cursor):
+    return NORMAL_LINE_COLOUR
+
+
+def _set_scroll_colour(line, cursor):
+    if line == cursor:
+        return REVERSE_LINE_COLOUR
+    if line % 2 == 0:
+        return DIM_LINE_COLOUR
+    return NORMAL_LINE_COLOUR
+
+
 def display_text(x):
     return str(x)
 
 
 def assign_width(obj, remaining_width):
     """Assign width provides a window their width.
-    
+
     All remaining width after each window has been assigned
     is added to the root window width.
     """

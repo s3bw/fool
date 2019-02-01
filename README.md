@@ -23,28 +23,30 @@ pip install git+ssh://git@github.com/foxyblue/fool.git@master
 
 ## Examples
 
+Please see [example.py](./example.py) for working examples of the views found [here](./examples/views.py)
+
 Accept user input
 
 ```python
 from fool import console
-from fool.bars import Bar
+from fool.bars import TextBar
 from fool.usrip import Input
 
 
-def view(model):
+def view(screen, model):
     left, right = model['left_right']
     return [
-        Bar("Option 1 or 2?", 5, 5),
+        TextBar("Option 1 or 2?", 5, 5),
         Input(left=left, right=right),
     ]
 
 
-def view_option_1(model):
-    return [Bar("Option 1", 5, 5)]
+def view_option_1(screen, model):
+    return [TextBar("Option 1", 5, 5)]
 
 
-def view_option_2(model):
-    return [Bar("Option 2", 5, 5)]
+def view_option_2(screen, model):
+    return [TextBar("Option 2", 5, 5)]
 
 
 model = {'left_right': ('h', 'l')}
@@ -88,14 +90,15 @@ from fool.windows import TableWindow
 
 
 def view(screen, model):
+    """In this example we see a scrollable table window."""
     main_items = model['main']
-    main = TableWindow(w=120, items=main_items)
-    columns = [
+    main = TableWindow(w=40, items=main_items, scroll=('k', 'j'))
+    content = [
         BooleanColumn(name='more', size=2, align='centre'),
-        Column(name='title', size=20, align='left'),
+        Column(name='title', size=10, align='left'),
         Column(name='description', size=32, align='left'),
     ]
-    main.columns = columns
+    main.content = content
     return [main]
 
 model = {'main':
