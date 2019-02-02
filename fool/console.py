@@ -1,7 +1,18 @@
+"""
+Call resolution:
+
+Window:
+
+    .__init__()
+    .visit(listener)
+    .attach_screen(screen)
+    .setup_content()
+    .update()
+    .draw()
+"""
 import curses
 from curses import panel
 
-from fool._base import Base
 from fool._listener import KeyListener
 
 
@@ -16,7 +27,31 @@ def setup_console(stdscreen, view, model, **kwargs):
     return action
 
 
-class Console(Base):
+class BaseMixin:
+
+    def update_screen(self):
+        self.max_y, self.max_x = self.screen.getmaxyx()
+        self.bottom_y = self.max_y - 1
+        self.right_x = self.max_x - 1
+        self.centre_x = int(self.max_x / 2)
+
+    def attach_screen(self, screen):
+        self.screen = screen
+        self.update_screen()
+
+    def update(self):
+        self.update_screen()
+
+    @property
+    def has_keys(self):
+        return (hasattr(self, 'key_map') and self.key_map)
+
+    def visit(self, listener):
+        if self.has_keys:
+            listener.keys.update(self.key_map)
+
+
+class Console(BaseMixin):
 
     def close(self):
         return 'exit'
@@ -33,7 +68,7 @@ class Console(Base):
 
         self.listener = KeyListener()
         self.collect_keys()
-        self.attach_screens()
+        self.prepare_ui()
 
     def __enter__(self):
         panel.update_panels()
@@ -51,10 +86,8 @@ class Console(Base):
         panel.update_panels()
         curses.doupdate()
 
-    def attach_screens(self):
+    def prepare_ui(self):
         for ui in self.render_ui:
-            # If a ui object has content, sometimes we are
-            # required to prepare this content for rendering.
             if hasattr(ui, 'content'):
                 ui.setup_content()
             ui.attach_screen(self.screen)

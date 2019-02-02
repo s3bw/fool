@@ -4,7 +4,7 @@ import itertools
 counter = itertools.count()
 
 
-def travel(ob):
+def _travel(ob):
     """Used for debugging.
     Prints the dimensions of mocked screen objects.
     """

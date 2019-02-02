@@ -7,14 +7,19 @@ from fool.usrip import Input
 def table_view(screen, model):
     """In this example we see a scrollable table window."""
     main_items = model['main']
-    main = TableWindow(w=40, items=main_items, scroll=('k', 'j'))
+    main = TableWindow(w=50, items=main_items, scroll=('j', 'k'))
+    # main.left = TableWindow(w=40, items=main_items) #, scroll=('h', 'l'))
     content = [
         BooleanColumn(name='more', size=2, align='centre'),
         Column(name='title', size=10, align='left'),
         Column(name='description', size=32, align='left'),
     ]
     main.content = content
-    return [main]
+    # main.left.content = content
+    return [
+        main,
+        # main.left,
+    ]
 
 
 def text_view(screen, model):

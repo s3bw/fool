@@ -15,6 +15,8 @@ class TextBlob:
             self.text = f.read()
 
     def draw(self, y, x, width, screen):
+        # This is text wrapping logic
+        # it should move to fool/text.py
         i = 0
         while i < len(self.text):
             y += 1
@@ -35,6 +37,7 @@ class BooleanColumn(Column):
 
 
 class ListItem:
+
     def __init__(self, **attrs):
         self.__dict__.update(attrs)
 

@@ -1,8 +1,47 @@
-"""Window class to split the console into parts."""
+"""
+The Window class acts as content containers for the fool
+display. An initial root window is defined and left and
+right margins can be instantiated to expand that single
+window as shown below:
+
+main = Window(w=10)
+main.left = Window(w=10)
+main.right = Window(w=10)
+main.right.left = Window(w=10)
+main.right.right = Window(w=10)
+main.left.left = Window(w=10)
+
+Determination of width.
+Width is determined using a breadth first traversal
+of the windows starting at the root. The remaining
+of the width is given to the root window. This allows
+the root to remain the dominant window on the screen
+and allows the margins to remain mere extensions.
+(Utilising addition screen space if it is available).
+
+     (0)
+    /   \
+  (1)   (2)
+  /     / \
+(3)   (4) (5)
+
+The x co-ordinate of the windows need then to be
+determined from left to right. For which an in-order
+traversal is required.
+
+     (2)
+    /   \
+  (1)   (4)
+  /     / \
+(0)   (3) (5)
+
+| 0 | 1 | 2 | 3 | 4 | 5 |
+          ^
+         root
+"""
 import curses
 
-from fool._base import Base
-from fool._debug import travel, counter
+from fool._debug import _travel, counter
 from fool._interactions import Scrollable
 
 from fool.text import Alignments
@@ -10,7 +49,7 @@ from fool.registry import Registry
 from fool.trees import in_order_traversal
 from fool.trees import breadth_first_traversal
 
-from fool.content import ListItem, ListItems
+from fool.content import ListItems
 
 
 NORMAL_LINE_COLOUR = curses.A_NORMAL
@@ -18,7 +57,31 @@ DIM_LINE_COLOUR = curses.A_DIM
 REVERSE_LINE_COLOUR = curses.A_REVERSE
 
 
-class Window(Base):
+class BaseMixin:
+
+    def update_screen(self):
+        self.max_y, self.max_x = self.screen.getmaxyx()
+        self.bottom_y = self.max_y - 1
+        self.right_x = self.max_x - 1
+        self.centre_x = int(self.max_x / 2)
+
+    def update(self):
+        self.update_screen()
+
+    @property
+    def has_keys(self):
+        return (hasattr(self, 'key_map') and self.key_map)
+
+    def visit(self, listener):
+        if self.has_keys:
+            listener.keys.update(self.key_map)
+        if self.left:
+            self.left.visit(listener)
+        if self.right:
+            self.right.visit(listener)
+
+
+class Window(BaseMixin):
 
     # Margins (would be instances of Window)
     left = None
@@ -41,9 +104,10 @@ class Window(Base):
 
         # Build each screen for the windows
         self.build_screen(screen)
+        self.update_screen()
 
         # NOTE:(foxyblue): travel used for debugging
-        travel(self)
+        _travel(self)
 
     def build_screen(self, screen):
         max_y, _ = screen.getmaxyx()
@@ -65,9 +129,6 @@ class Window(Base):
         self.screen.mvderwin(y, x)
         # Resize h, w
         self.screen.resize(h, w)
-
-    def update(self):
-        super(Window, self).update()
 
     def draw(self):
         if self.width:
@@ -95,13 +156,13 @@ class TableWindow(Window, Scrollable, Alignments):
 
     def __init__(self, w, items, scroll=None):
         self.items = ListItems(items)
-        super().__init__(w=w)
         self.line_colouring = _set_colour
+        super().__init__(w=w)
         if scroll:
-            up, down = scroll
+            down, up = scroll
             self.key_map = {
-                up: self.move_up,
                 down: self.move_down,
+                up: self.move_up,
             }
             self.max_pos = len(self.items)
             self.line_colouring = _set_scroll_colour
@@ -109,15 +170,19 @@ class TableWindow(Window, Scrollable, Alignments):
     def setup_content(self):
         self.register_columns()
 
-    def update(self):
-        self.reduction = self.list_top
-        self.cursor = self.position
-        super().update()
-
     def register_columns(self):
         self.registry = Registry()
         for column in self.content:
             self.registry.register_object(column.name, column)
+
+    def update(self):
+        new_max = len(self.items)
+        self.max_y, self.max_x = self.screen.getmaxyx()
+        self.bottom_line = self.max_y - 1
+        self.centre_x = int(self.max_x / 2)
+        if new_max != self.max_pos:
+            self.max_pos = new_max
+        super().update()
 
     def draw_line(self, item, line, line_colour):
         align = {'left': self.left_align,
@@ -144,13 +209,13 @@ class TableWindow(Window, Scrollable, Alignments):
 
     def draw_item(self, item):
         """Draw an item."""
-        if self.reduction > 0:
-            self.reduction -= 1
+        if self.top_reduction > 0:
+            self.top_reduction -= 1
         else:
             self.drawing_line += 1
             if self.drawing_line < self.bottom_line - 1:
                 line = self.drawing_line
-                line_colour = self.line_colouring(line, self.cursor)
+                line_colour = self.line_colouring(line, self.cursor_position)
                 self.draw_line(item, line, line_colour)
 
     def draw(self):
