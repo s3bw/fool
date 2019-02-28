@@ -28,7 +28,8 @@ def text_view(screen, model):
     main.content = [
         TextBlob(path='example_text.txt')
     ]
-    return [main]
+    ip = Input(switch='a')
+    return [main, ip]
 
 
 def basic_view(screen, model):
@@ -43,4 +44,5 @@ def margin_view(screen, model):
     main = Window(w=30)
     main.left = Window(w=20)
     main.right = Window(w=20)
-    return [main]
+    ip = Input(switch='a')
+    return [main, ip]

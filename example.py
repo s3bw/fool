@@ -1,4 +1,6 @@
 from fool import console
+from fool._debug import counter
+
 from examples.views import table_view
 from examples.views import text_view
 from examples.views import basic_view
@@ -15,7 +17,13 @@ model = {
     'left_right': ('h', 'l'),
 }
 
-console.display(table_view, model, close='q')
-console.display(text_view, model, close='q')
-console.display(basic_view, model, close='q')
-console.display(margin_view, model, close='q')
+# console.display(table_view, model, close='x')
+# console.display(basic_view, model, close='q')
+
+
+result = 'none'
+while result != 'exit':
+    result = console.display(text_view, model, close='q')
+    if result == 'exit':
+        break
+    result = console.display(margin_view, model, close='q')
