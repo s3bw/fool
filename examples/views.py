@@ -13,7 +13,12 @@ def table_view(screen, model):
     entities = model['entities']
     table_items = [TableItem(**kwargs) for kwargs in entities]
     main = TableWindow(
-        registry=column_registry, items=table_items, w=50, scroll=('j', 'k'))
+        registry=column_registry,
+        items=table_items,
+        w=50,
+        down='j',
+        up='k',
+        select='p')
 
     return [
         main,

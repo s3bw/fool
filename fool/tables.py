@@ -1,3 +1,5 @@
+"""table.py contains the objects used in rendering a table."""
+
 from collections import OrderedDict
 
 
@@ -34,6 +36,7 @@ class ColumnRegistry:
         self.registry.set(title, column)
 
     def setBoolean(self, title, *, size, align):
+        """Register a boolean column, These will have default values."""
         column = BooleanColumn(title, size, align)
         self.registry.set(title, column)
 

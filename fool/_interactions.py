@@ -15,6 +15,16 @@ class Scrollable:
     top_line = 0
     list_pointer = 0
 
+    def __init__(self):
+        self.control_keys = {
+            'up': self.move_up,
+            'down': self.move_down,
+            'select': self.select,
+        }
+
+    def select(self):
+        return self.list_pointer
+
     def move_to_cursor_position(self, cursor_position):
         while self.cursor_position != cursor_position:
             if self.cursor_position > cursor_position:

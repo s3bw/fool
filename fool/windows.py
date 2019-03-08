@@ -85,6 +85,7 @@ class Window(BaseMixin):
     right = None
 
     def __init__(self, name=None, h=None, w=None):
+        super().__init__()
         self.name = next(counter) if not name else name
         self.h = h
         self.max_w = w
@@ -149,19 +150,27 @@ class TextWindow(Window):
 
 
 class TableWindow(Window, Scrollable, Alignments):
-    def __init__(self, registry, items, w, scroll=None):
+    def __init__(self, registry, items, w, **kwargs):
+        #: control_keys are the available key presses for the table window
         self.items = TableItems(items)
         self.registry = registry
-        self.line_colouring = _set_colour
+        # self.line_colouring = _set_colour
+        #: Always set line colouring as alternating
+        self.line_colouring = _set_scroll_colour
         super().__init__(w=w)
-        if scroll:
-            down, up = scroll
-            self.key_map = {
-                down: self.move_down,
-                up: self.move_up,
-            }
-            self.max_pos = len(self.items)
-            self.line_colouring = _set_scroll_colour
+        self.set_keys(kwargs)
+        self.max_pos = len(self.items)
+
+    def set_keys(self, keys):
+        """Set the keys to the values defined in the kwargs.
+
+        A valid control for this objects comes from the keys
+        defined in `self.control_keys`.
+        """
+        self.key_map = {}
+        for key, value in keys.items():
+            if key in self.control_keys:
+                self.key_map[value] = self.control_keys[key]
 
     def update(self):
         new_max = len(self.items)

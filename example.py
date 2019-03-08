@@ -19,22 +19,31 @@ model = {
             'more': True
         },
         {
-            'title': '3rd item',
+            'title': '13rd item',
             'description': '3rd item description',
             'more': True
         },
         {
-            'title': '3rd item',
+            'title': '23rd item',
             'description': '3rd item description',
             'more': True
         },
         {
-            'title': '3rd item',
+            'title': '33rd item',
             'description': '3rd item description',
             'more': True
         },
     ],
-    'left_right': ('h', 'l'),
 }
 
-console.display(table_view, model, close='q')
+y = console.display(table_view, model, close='q')
+print(model['entities'][y])
+
+# TabTransition(
+#     right='h',
+#     left='l',
+#     tabs={
+#         'general': console.display(table_view, model, close='q'),
+#         'books': console.display(table_view, model, close='q'),
+#         'talks': console.display(table_view, model, close='q'),
+#     })
