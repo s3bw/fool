@@ -45,12 +45,10 @@ from fool._debug import _travel, counter
 from fool._interactions import Scrollable
 
 from fool.text import Alignments
-from fool.registry import Registry
 from fool.trees import in_order_traversal
 from fool.trees import breadth_first_traversal
 
-from fool.content import ListItems
-
+from fool.tables import TableItems
 
 NORMAL_LINE_COLOUR = curses.A_NORMAL
 DIM_LINE_COLOUR = curses.A_DIM
@@ -58,7 +56,6 @@ REVERSE_LINE_COLOUR = curses.A_REVERSE
 
 
 class BaseMixin:
-
     def update_screen(self):
         self.max_y, self.max_x = self.screen.getmaxyx()
         self.bottom_y = self.max_y - 1
@@ -140,7 +137,6 @@ class Window(BaseMixin):
 
 
 class TextWindow(Window):
-
     def draw(self):
         if self.width:
             for content in self.content:
@@ -153,9 +149,9 @@ class TextWindow(Window):
 
 
 class TableWindow(Window, Scrollable, Alignments):
-
-    def __init__(self, w, items, scroll=None):
-        self.items = ListItems(items)
+    def __init__(self, registry, items, w, scroll=None):
+        self.items = TableItems(items)
+        self.registry = registry
         self.line_colouring = _set_colour
         super().__init__(w=w)
         if scroll:
@@ -167,14 +163,6 @@ class TableWindow(Window, Scrollable, Alignments):
             self.max_pos = len(self.items)
             self.line_colouring = _set_scroll_colour
 
-    def setup_content(self):
-        self.register_columns()
-
-    def register_columns(self):
-        self.registry = Registry()
-        for column in self.content:
-            self.registry.register_object(column.name, column)
-
     def update(self):
         new_max = len(self.items)
         self.max_y, self.max_x = self.screen.getmaxyx()
@@ -185,13 +173,15 @@ class TableWindow(Window, Scrollable, Alignments):
         super().update()
 
     def draw_line(self, item, line, line_colour):
-        align = {'left': self.left_align,
-                 'right': self.right_align,
-                 'centre': self.centre_align}
+        align = {
+            'left': self.left_align,
+            'right': self.right_align,
+            'centre': self.centre_align
+        }
 
         left_x = self.start_x + 2
-        for column in self.registry.get_objects():
-            cln_setting = self.registry.get_object(column)
+        for column in self.registry.getColumns():
+            cln_setting = self.registry.getColumn(column)
             size = cln_setting.size
             if left_x + size + 2 < (self.start_x + self.width):
                 pline = getattr(item, column)

@@ -1,46 +1,20 @@
-from fool.content import Column, BooleanColumn, TextBlob
-from fool.windows import TableWindow, Window, TextWindow
-from fool.bars import TextBar
-from fool.usrip import Input
+from fool.tables import ColumnRegistry, TableItem
+from fool.windows import TableWindow
+
+column_registry = ColumnRegistry()
+
+column_registry.setBoolean('more', size=2, align='centre')
+column_registry.setColumn('title', size=10, align='left')
+column_registry.setColumn('description', size=32, align='left')
 
 
 def table_view(screen, model):
     """In this example we see a scrollable table window."""
-    main_items = model['main']
-    main = TableWindow(w=50, items=main_items, scroll=('j', 'k'))
-    # main.left = TableWindow(w=40, items=main_items) #, scroll=('h', 'l'))
-    content = [
-        BooleanColumn(name='more', size=2, align='centre'),
-        Column(name='title', size=10, align='left'),
-        Column(name='description', size=32, align='left'),
-    ]
-    main.content = content
-    # main.left.content = content
+    entities = model['entities']
+    table_items = [TableItem(**kwargs) for kwargs in entities]
+    main = TableWindow(
+        registry=column_registry, items=table_items, w=50, scroll=('j', 'k'))
+
     return [
         main,
-        # main.left,
     ]
-
-
-def text_view(screen, model):
-    """In this example we load text into a window."""
-    main = TextWindow(w=70)
-    main.content = [
-        TextBlob(path='example_text.txt')
-    ]
-    return [main]
-
-
-def basic_view(screen, model):
-    left, right = model['left_right']
-    return [
-        TextBar("Option 1 or 2?", 5, 5),
-        Input(left=left, right=right),
-    ]
-
-
-def margin_view(screen, model):
-    main = Window(w=30)
-    main.left = Window(w=20)
-    main.right = Window(w=20)
-    return [main]
