@@ -1,3 +1,5 @@
+from fool.console import ConsoleReturn
+
 LOOP_RULE = 4
 
 
@@ -23,7 +25,8 @@ class Scrollable:
         }
 
     def select(self):
-        return self.list_pointer
+        """ Selects and returns an index."""
+        return ConsoleReturn('select', value=self.list_pointer)
 
     def move_to_cursor_position(self, cursor_position):
         while self.cursor_position != cursor_position:

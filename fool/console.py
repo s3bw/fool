@@ -28,10 +28,11 @@ def setup_console(stdscreen, view, model, **kwargs):
 
 
 class BaseMixin:
-
     def update_screen(self):
         self.max_y, self.max_x = self.screen.getmaxyx()
+        #: bottom_y is the max y we can draw on
         self.bottom_y = self.max_y - 1
+        #: right_x is the max x we can draw on
         self.right_x = self.max_x - 1
         self.centre_x = int(self.max_x / 2)
 
@@ -51,10 +52,34 @@ class BaseMixin:
             listener.keys.update(self.key_map)
 
 
-class Console(BaseMixin):
+class ConsoleReturn:
+    """ConsoleReturn standardises the data structure returned by
+    the console.
+    """
 
+    def __init__(self, action, value=None, key=None):
+        #: action describes the action returned
+        self.action = action
+        #: value carries an integer related to the action
+        #: (optional) Not all actions will have an integer
+        self.value = value
+        #: key carries a string related to the action
+        #: (optional) Not all actions will have a string
+        self.key = key
+
+    def __str__(self):
+        """String representation of console return."""
+        return str({
+            'action': self.action,
+            'value': self.value,
+            'key': self.key
+        })
+
+
+class Console(BaseMixin):
     def close(self):
-        return 'exit'
+        """Close will exit the current display."""
+        return ConsoleReturn(action='close')
 
     def __init__(self, stdscreen, view, model, **kwargs):
         self.screen = stdscreen.subwin(0, 0)
@@ -94,6 +119,10 @@ class Console(BaseMixin):
         self.listener.attach_screen(self.screen)
 
     def collect_keys(self):
+        """Collect key will find keys mapped to an action,
+        these are then stored in the listener which responds
+        to key presses.
+        """
         self.visit(self.listener)
         for ui in self.render_ui:
             ui.visit(self.listener)
@@ -105,6 +134,10 @@ class Console(BaseMixin):
             ui.draw()
 
     def show(self):
+        """While an action has not been taken `action` will be False.
+        If an action is taken `action` will be a ConsoleReturn object
+        as a result the console closes and the action returns.
+        """
         action = False
         while not action:
             self.render()

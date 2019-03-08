@@ -36,8 +36,9 @@ model = {
     ],
 }
 
-y = console.display(table_view, model, close='q')
-print(model['entities'][y])
+action = console.display(table_view, model, close='q')
+
+print(model['entities'][action.value])
 
 # TabTransition(
 #     right='h',
