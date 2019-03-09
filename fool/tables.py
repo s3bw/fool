@@ -96,10 +96,9 @@ class TableItem:
     def toggle_expand(self):
         if self.expand:
             self.expand = False
-            setattr(self, self.expand_title, self.set_indicator())
         else:
             self.expand = True
-            setattr(self, self.expand_title, self.set_indicator())
+        setattr(self, self.expand_title, self.set_indicator())
 
 
 class TableItems:
