@@ -1,8 +1,8 @@
 """
 The Window class acts as content containers for the fool
 display. An initial root window is defined and left and
-right margins can be instantiated to expand that single
-window as shown below:
+right margins can be instantiated to extend the
+functionality of that single window as shown below:
 
 main = Window(w=10)
 main.left = Window(w=10)
@@ -11,13 +11,13 @@ main.right.left = Window(w=10)
 main.right.right = Window(w=10)
 main.left.left = Window(w=10)
 
-Determination of width.
+Determination of width:
 Width is determined using a breadth first traversal
-of the windows starting at the root. The remaining
-of the width is given to the root window. This allows
-the root to remain the dominant window on the screen
-and allows the margins to remain mere extensions.
-(Utilising addition screen space if it is available).
+of the windows starting at the root. The width remaining
+is given to the root window. This allows the root to
+remain the dominant window on the screen and allows the
+margins to be used just as extensions.
+(Utilising additional screen space if it is available).
 
      (0)
     /   \
@@ -25,6 +25,7 @@ and allows the margins to remain mere extensions.
   /     / \
 (3)   (4) (5)
 
+Determination of left-most x co-ordinate:
 The x co-ordinate of the windows need then to be
 determined from left to right. For which an in-order
 traversal is required.
@@ -173,12 +174,10 @@ class TableWindow(Window, Scrollable, Alignments):
                 self.key_map[value] = self.control_keys[key]
 
     def update(self):
-        new_max = len(self.items)
+        self.max_pos = len(self.items)
         self.max_y, self.max_x = self.screen.getmaxyx()
         self.bottom_line = self.max_y - 1
         self.centre_x = int(self.max_x / 2)
-        if new_max != self.max_pos:
-            self.max_pos = new_max
         super().update()
 
     def draw_line(self, item, line, line_colour):
@@ -192,6 +191,7 @@ class TableWindow(Window, Scrollable, Alignments):
         for column in self.registry.getColumns():
             cln_setting = self.registry.getColumn(column)
             size = cln_setting.size
+            # Draw columns until we run out of 'x' space
             if left_x + size + 2 < (self.start_x + self.width):
                 pline = getattr(item, column)
                 pline = display_text(pline)
@@ -207,7 +207,10 @@ class TableWindow(Window, Scrollable, Alignments):
                 break
 
     def draw_item(self, item):
-        """Draw an item."""
+        """Draw an item.
+
+        `top_reduction` handles lists with more items than height.
+        """
         if self.top_reduction > 0:
             self.top_reduction -= 1
         else:
