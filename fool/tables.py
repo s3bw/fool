@@ -60,8 +60,46 @@ class BooleanColumn(Column):
 
 
 class TableItem:
-    def __init__(self, **attrs):
+    def __init__(self, expansion=None, **attrs):
+        """We should make the expanding indicators customisable here.
+
+        To include sub_items both `sub_title` and `expand_title`
+        need to be set.
+        """
+        if expansion:
+            expand_title, sub_title = expansion
+            # The `sub_title` should be an available key in attrs
+            # even if it's empty
+            self.subItems = [
+                TableItem(**kwargs) for kwargs in attrs.pop(sub_title)
+            ]
+            for item in self.subItems:
+                setattr(item, expand_title, '-')
+            self.expand = False
+            attrs.pop(expand_title)
+            # Gets name of expandable column and sets value to indicator
+            setattr(self, 'expand_title', expand_title)
+            setattr(self, expand_title, self.set_indicator())
         self.__dict__.update(attrs)
+
+    def set_indicator(self):
+        """Indicating if the item can be expanded, and if so
+        it will indicate if it has been expanded.
+        """
+        if self.subItems and self.expand:
+            return '▾'
+        elif self.subItems:
+            return '▸'
+        else:
+            return ' '
+
+    def toggle_expand(self):
+        if self.expand:
+            self.expand = False
+            setattr(self, self.expand_title, self.set_indicator())
+        else:
+            self.expand = True
+            setattr(self, self.expand_title, self.set_indicator())
 
 
 class TableItems:
@@ -69,11 +107,12 @@ class TableItems:
         self.menu = items
 
     def __len__(self):
-        return len(self.menu)
+        """Length returns the length of all items which are viewable."""
+        return sum(1 for _ in self.iter_viewable())
 
     def iter_viewable(self):
         for item in self.menu:
             yield item
             if hasattr(item, 'expand') and item.expand:
-                for subitem in item.subitems:
+                for subitem in item.subItems:
                     yield subitem

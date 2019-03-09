@@ -7,32 +7,38 @@ model = {
         {
             'title': 'first item',
             'description': 'first item description',
-            'more': True
+            'more': False,
+            'sub_items': [],
         },
         {
             'title': '2nd item',
             'description': '2nd item description',
-            'more': False
+            'more': False,
+            'sub_items': [],
         },
         {
-            'title': '3rd item',
-            'description': '3rd item description',
-            'more': True
-        },
-        {
-            'title': '13rd item',
-            'description': '3rd item description',
-            'more': True
+            'title':
+            '3rd item',
+            'description':
+            '3rd item description',
+            'more':
+            True,
+            'sub_items': [{
+                'title': '13rd item',
+                'description': '3rd item description',
+            }],
         },
         {
             'title': '23rd item',
             'description': '3rd item description',
-            'more': True
+            'more': False,
+            'sub_items': [],
         },
         {
             'title': '33rd item',
             'description': '3rd item description',
-            'more': True
+            'more': False,
+            'sub_items': [],
         },
     ],
     'books': [
@@ -59,12 +65,3 @@ while Actor.action not in ['close', 'select']:
 
 if Actor.action != 'close':
     print(model['entities'][Actor.value])
-
-# TabTransition(
-#     right='h',
-#     left='l',
-#     tabs={
-#         'general': console.display(table_view, model, close='q'),
-#         'books': console.display(table_view, model, close='q'),
-#         'talks': console.display(table_view, model, close='q'),
-#     })

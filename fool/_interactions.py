@@ -22,7 +22,15 @@ class Scrollable:
             'up': self.move_up,
             'down': self.move_down,
             'select': self.select,
+            'expand': self.expand,
         }
+
+    def expand(self):
+        """ Expand the selected item."""
+        for index, item in enumerate(self.items.iter_viewable()):
+            if index == self.list_pointer:
+                if hasattr(item, 'subItems'):
+                    item.toggle_expand()
 
     def select(self):
         """ Selects and returns an index."""
