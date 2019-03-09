@@ -18,6 +18,9 @@ def _travel(ob):
             queue.append(ob.right)
 
 
+ScreenStats = "Subwin {}; h: {}, w: {}, y: {}, x: {}"
+
+
 class Screen:
 
     iditer = itertools.count()
@@ -39,7 +42,7 @@ class Screen:
 
         screen = Screen(h, w, y, x)
         screen.parscreen = self
-        print("Subwin {}; h: {}, w: {}, y: {}, x: {}".format(screen.name, h, w, y, x))
+        print(ScreenStats.format(screen.name, h, w, y, x))
         return screen
 
     def getparyx(self):
