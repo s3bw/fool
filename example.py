@@ -1,4 +1,5 @@
 from fool import console
+from fool.console import ConsoleReturn
 from examples.views import table_view
 
 model = {
@@ -34,11 +35,30 @@ model = {
             'more': True
         },
     ],
+    'books': [
+        'lists', 'general', 'general', 'general', 'talks', 'talks', 'talks',
+        'general', 'general', 'general', 'general', 'general', 'general',
+        'general', 'general', 'general', 'talks', 'general', 'general',
+        'general', 'general', 'talks', 'design', 'talks', 'textbook', 'lists',
+        'general', 'general', 'general', 'lists', 'general', 'general',
+        'general', 'textbook', 'general', 'general', 'talks', 'general',
+        'general', 'general', 'general', 'general', 'general', 'general',
+        'general', 'talks', 'talks', 'general', 'general', 'textbook',
+        'textbook', 'general', 'design', 'textbook', 'general', 'general',
+        'talks', 'lists', 'general', 'general', 'general', 'general'
+    ],
+    'book':
+    'general',
 }
 
-action = console.display(table_view, model, close='q')
+Actor = ConsoleReturn('running')
+while Actor.action not in ['close', 'select']:
+    Actor = console.display(table_view, model, close='q')
+    if Actor.action in ['next', 'prev']:
+        model['book'] = Actor.key
 
-print(model['entities'][action.value])
+if Actor.action != 'close':
+    print(model['entities'][Actor.value])
 
 # TabTransition(
 #     right='h',
