@@ -33,8 +33,20 @@ class Scrollable:
                     item.toggle_expand()
 
     def select(self):
-        """ Selects and returns an index."""
-        return ConsoleReturn('select', value=self.list_pointer)
+        """ Selects and returns an index.
+
+        This function won't know what parameters the item holds,
+        we should make this more configurable when creating the
+        view.
+        Until this is fixed, foolscap will fail to call 'view'.
+        """
+        for index, item in enumerate(self.items.iter_viewable()):
+            if index == self.list_pointer and item.isRoot():
+                return ConsoleReturn(
+                    'select',
+                    value=self.list_pointer,
+                    key=item.title,
+                )
 
     def move_to_cursor_position(self, cursor_position):
         while self.cursor_position != cursor_position:

@@ -66,6 +66,7 @@ class TableItem:
         To include sub_items both `sub_title` and `expand_title`
         need to be set.
         """
+        self.is_root = True
         if expansion:
             expand_title, sub_title = expansion
             # The `sub_title` should be an available key in attrs
@@ -74,6 +75,7 @@ class TableItem:
                 TableItem(**kwargs) for kwargs in attrs.pop(sub_title)
             ]
             for item in self.subItems:
+                item.is_root = False
                 setattr(item, expand_title, '-')
             self.expand = False
             attrs.pop(expand_title)
@@ -87,6 +89,9 @@ class TableItem:
             return self.__dict__[name]
         except KeyError:
             return ' '
+
+    def isRoot(self):
+        return self.is_root
 
     def set_indicator(self):
         """Indicating if the item can be expanded, and if so
