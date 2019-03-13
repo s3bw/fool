@@ -82,6 +82,12 @@ class TableItem:
             setattr(self, expand_title, self.set_indicator())
         self.__dict__.update(attrs)
 
+    def __getattr__(self, name):
+        try:
+            return self.__dict__[name]
+        except KeyError:
+            return ' '
+
     def set_indicator(self):
         """Indicating if the item can be expanded, and if so
         it will indicate if it has been expanded.
