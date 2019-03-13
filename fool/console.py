@@ -85,7 +85,7 @@ class Console(BaseMixin):
         self.screen = stdscreen.subwin(0, 0)
         self.panel = panel.new_panel(self.screen)
 
-        self.render_ui = view(self.screen, model)
+        self.render_ui = view(model)
         self.key_map = {
             value: getattr(self, key)
             for key, value in kwargs.items()
