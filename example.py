@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fool import console
 from fool.console import ConsoleReturn
 from examples.views import table_view
@@ -9,12 +11,14 @@ model = {
             'description': 'first item description',
             'more': False,
             'sub_items': [],
+            'created': datetime(2019, 10, 26),
         },
         {
             'title': '2nd item',
             'description': '2nd item description',
             'more': False,
             'sub_items': [],
+            'created': datetime(2019, 10, 26),
         },
         {
             'title':
@@ -27,18 +31,22 @@ model = {
                 'title': '13rd item',
                 'description': '3rd item description',
             }],
+            'created':
+            datetime(2019, 10, 26),
         },
         {
             'title': '23rd item',
             'description': '3rd item description',
             'more': False,
             'sub_items': [],
+            'created': datetime(2019, 10, 26),
         },
         {
             'title': '33rd item',
             'description': '3rd item description',
             'more': False,
             'sub_items': [],
+            'created': datetime(2019, 10, 26),
         },
     ],
     'books': [

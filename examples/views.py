@@ -9,6 +9,7 @@ column_registry = ColumnRegistry()
 column_registry.setBoolean('more', size=2, align='centre')
 column_registry.setColumn('title', size=10, align='left')
 column_registry.setColumn('description', size=32, align='left')
+column_registry.setDatetime('created', size=32, align='right')
 
 
 def table_view(model):

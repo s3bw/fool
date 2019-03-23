@@ -40,6 +40,11 @@ class ColumnRegistry:
         column = BooleanColumn(title, size, align)
         self.registry.set(title, column)
 
+    def setDatetime(self, title, *, size, align, fmt='{:%Y-%m-%d}'):
+        """Register a datetime column."""
+        column = DatetimeColumn(title, size, align, fmt)
+        self.registry.set(title, column)
+
     def getColumn(self, name):
         return self.registry.get(name)
 
@@ -49,14 +54,24 @@ class ColumnRegistry:
 
 
 class Column:
-    def __init__(self, name, size, align='left'):
+    def __init__(self, name, size, align, fmt='{}'):
         self.name = name
         self.size = size
         self.align = align
+        self.fmt = fmt
+
+    def default(self):
+        return ' '
+
+
+class DatetimeColumn(Column):
+    def default(self):
+        return '<->'
 
 
 class BooleanColumn(Column):
-    pass
+    def default(self):
+        return 'nil'
 
 
 class TableItem:
@@ -76,7 +91,7 @@ class TableItem:
             ]
             for item in self.subItems:
                 item.is_root = False
-                setattr(item, expand_title, '-')
+                setattr(item, expand_title, '>')
             self.expand = False
             attrs.pop(expand_title)
             # Gets name of expandable column and sets value to indicator
@@ -88,7 +103,7 @@ class TableItem:
         try:
             return self.__dict__[name]
         except KeyError:
-            return ' '
+            return None
 
     def isRoot(self):
         return self.is_root

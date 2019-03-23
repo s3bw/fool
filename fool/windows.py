@@ -194,7 +194,11 @@ class TableWindow(Window, Scrollable, Alignments):
             # Draw columns until we run out of 'x' space
             if left_x + size + 2 < (self.start_x + self.width):
                 pline = getattr(item, column)
-                pline = display_text(pline)
+                if not pline:
+                    pline = cln_setting.default()
+                else:
+                    fmt = cln_setting.fmt
+                    pline = fmt.format(pline)
 
                 alignment = cln_setting.align
                 pline = align[alignment](pline, size)
@@ -238,10 +242,6 @@ def _set_scroll_colour(line, cursor):
     if line % 2 == 0:
         return DIM_LINE_COLOUR
     return NORMAL_LINE_COLOUR
-
-
-def display_text(x):
-    return str(x)
 
 
 def assign_width(obj, remaining_width):
